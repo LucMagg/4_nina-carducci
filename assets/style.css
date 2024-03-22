@@ -10,7 +10,7 @@ body {
 	background-color: white;
 	position: sticky;
 	top:0;
-	z-index: 1000;
+	z-index: 2;
 	display: flex;
 	justify-content: space-between;
 	padding-inline: 100px;
@@ -40,6 +40,7 @@ body {
 
 .social-link img {
 	width: 20px;
+	height: 20px;
 }
 
 #about {
@@ -72,26 +73,25 @@ body {
 
 }
 #about-me {
-	flex: 2
+	flex: 2;
 }
 .about-me__title {
 	margin-top: 1em;
 	margin-bottom: 60px;
 	font-size: 30px;
 }
-.about-me__introduction {
+#about-me__introduction {
 	font-family: 'Spectral';
 	font-weight: 800;
 	font-style: italic;
+	font-size: 1rem;
 	width: 60%;
+    margin-bottom: 0.5rem;
+	line-height: 1.2;
 }
-#about-me p {
+#about-me__text {
 	width: 80%;
 	font-size: 14px;
-}
-
-#gallery {
-	/*	min-height: 100vh; */
 }
 .title{
 	text-align: center;
@@ -100,9 +100,9 @@ body {
 .gallery .nav {
 	justify-content: center;
 }
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+.nav-pills .nav-link.active-tag, .nav-pills .show > .nav-link {
 	color: #fff;
-	background-color: #BEB45A;
+	background-color: #5E5926;
 	border-radius:0 ;
 }
 .nav-pills .nav-link {
@@ -142,6 +142,10 @@ body {
 	width: 70%;
 	margin: auto;
 	padding-block: 3em;
+	margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
 }
 .quote__text {
 	font-family: Spectral;
