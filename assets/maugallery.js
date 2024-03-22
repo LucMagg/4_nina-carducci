@@ -159,6 +159,7 @@
         imagesCollection[index-1] ||
         imagesCollection[imagesCollection.length - 1];
       $(".lightboxImage").attr("src", $(next).attr("src"));
+      $(".lightboxImage").attr("alt", $(next).attr("alt"));
     },
     nextImage() {
       console.log("next");
@@ -198,6 +199,7 @@
       });
       next = imagesCollection[index+1] || imagesCollection[0];
       $(".lightboxImage").attr("src", $(next).attr("src"));
+      $(".lightboxImage").attr("alt", $(next).attr("alt"));
     },
     createLightBox(gallery, lightboxId, navigation) {
       gallery.append(`<div class="modal fade" id="${
@@ -211,7 +213,7 @@
                                 ? '<div class="mg-prev" style="cursor:pointer;position:absolute;top:50%;left:-15px;background:white;"><</div>'
                                 : '<span style="display:none;" />'
                             }
-                            <img class="lightboxImage img-fluid"/>
+                            <img class="lightboxImage img-fluid" alt=""/>
                             ${
                               navigation
                                 ? '<div class="mg-next" style="cursor:pointer;position:absolute;top:50%;right:-15px;background:white;}">></div>'
