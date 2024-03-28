@@ -1,12 +1,16 @@
 const packageLocation = "./js-packages/carousel";
+const interval = 5000;
+const slidingTime = 600;
 
 let carousel = null;
 let container = null;
 let slides = null;
 let leftAndRightButtons = [];
-let bottomButtonList = [];
+let bottomButtons = null;
 let activeSlide = 0;
-let autoSliding = 0;
+let isNotSliding = true;
+let retardedAutoSliding = null;
+let autoSlidingInterval = null;
 
 
 function setCarousel(param) {
@@ -17,10 +21,9 @@ function setCarousel(param) {
     setContainer();
     setSlides(children);
     setButtons();
-    setBottomButtons();
-    autoSliding = new interval(() => {moveToSlide(activeSlide + 1)}, 4000);
-    moveToSlide(0);
+    setBottomButtons(children);
     setButtonsListeners();
+    setRetardedAutoSliding();
 }
 
 function loadCSS(){
@@ -45,10 +48,9 @@ function setSlides(children) {
         let slide = document.createElement("div");
         slide.className = "carousel-slide";
         slide.appendChild(child);
-        container.appendChild(slide)
         return slide;
     });
-    container.style.width = (slides.length * 100) + "%";
+    container.appendChild(slides[0]);
 }
 
 function setButtons() {
@@ -73,74 +75,108 @@ function setButtons() {
     }
 }
 
-function setBottomButtons() {
+function setBottomButtons(children) {
     let carouselBottomButtons = document.createElement("div");
     carouselBottomButtons.className = "carousel-bottom-container";
     carousel.appendChild(carouselBottomButtons);
-    for (let i = 0; i < slides.length; i++) {
+    bottomButtons = children.map((child) => {
         let button = document.createElement("button");
         button.type = "button";
-        button.ariaLabel = `Slide ${i+1}`;
+        button.ariaLabel = `Slide ${children.indexOf(child)+1}`;
         button.className = "carousel-bottom-button";
         carouselBottomButtons.appendChild(button);
-        bottomButtonList.push(button);
-    }
+        return button;
+    });
+    bottomButtons[0].classList.add("carousel-bottom-button-active");
 }
 
 function setButtonsListeners() {
     for (let i = 0; i < 2; i++){
         if (i === 0) {
-            leftAndRightButtons[i].addEventListener('click', () => moveToSlide(activeSlide - 1));
+            leftAndRightButtons[i].addEventListener('click', () => slide("slide-to-left",1));
         } else {
-            leftAndRightButtons[i].addEventListener('click', () => moveToSlide(activeSlide + 1));
+            leftAndRightButtons[i].addEventListener('click', () => slide("slide-to-right",1));
         }
     }
     
-    for (let i = 0; i < bottomButtonList.length; i++) {
-        bottomButtonList[i].addEventListener("click", () => {moveToSlide(i)});
+    for (let i = 0; i < bottomButtons.length; i++) {
+        bottomButtons[i].addEventListener("click", () => {moveToSlide(i)});
+    }
+}
+
+function targetSlide(offset) {
+    let target = activeSlide + offset;
+    if (target < 0) {
+        target = slides.length + offset;
+    } else if (target >= slides.length) {
+        target = 0;
+    }
+    return target;
+}
+
+function slide(className, offset) {
+    if (isNotSliding) {
+        isNotSliding = false;
+        clearTimeout(retardedAutoSliding);
+        clearInterval(autoSlidingInterval);
+        container.style.width = "200%";
+        let newSlide = 0;
+        if (className === "slide-to-left") {
+            newSlide = targetSlide(-1);
+            container.insertBefore(slides[newSlide], container.firstChild);
+            container.style.marginLeft = "-100%";
+        } else {
+            newSlide = targetSlide(1);
+            container.appendChild(slides[newSlide]);
+        }
+        container.classList.add(className);
+        container.style.transition = `transform ${slidingTime}ms ease-in-out`;
+
+        bottomButtons[activeSlide].classList.remove("carousel-bottom-button-active");
+        bottomButtons[newSlide].classList.add("carousel-bottom-button-active");
+
+        container.addEventListener("transitionend", function whenTransitionHasEnded() {
+            container.removeEventListener("transitionend",whenTransitionHasEnded);
+            slides[activeSlide].remove();
+            container.removeAttribute("style");
+            container.classList.remove(className);
+            activeSlide = newSlide;
+            isNotSliding = true;
+            offset = offset - 1;
+            console.log(`${Date.now()} : transition terminée`);
+            if (offset !== 0) {
+                setTimeout(() => {
+                    slide(className, offset);
+                }, 0);
+            } else {
+                setRetardedAutoSliding();
+            }
+        });
     }
 }
 
 function moveToSlide(slideIndex) {
-    if (slideIndex < 0) {
-        slideIndex = slides.length - 1;
-    } else if (slideIndex >= slides.length) {
-        slideIndex = 0;
-    }
-    container.style.transform = `translateX(-${slideIndex * (100/slides.length)}%)`;
-    activeSlide = slideIndex;
-    for (let i = 0; i < bottomButtonList.length; i++) {
-        if (i === activeSlide) {
-            bottomButtonList[i].classList.add("carousel-bottom-button-active");
+    let delta = slideIndex - activeSlide;
+    let className = "";
+    if (delta === 0) {
+        return;
+    } else {
+        if (delta > 0) {
+            className = "slide-to-right";
         } else {
-            bottomButtonList[i].classList.remove("carousel-bottom-button-active");
+            className = "slide-to-left";
         }
+            slide(className, Math.abs(delta));
     }
-    autoSliding.reset();
 }
 
-function interval(func, ms) {
-    let timerObj = setInterval(func, ms);
 
-    this.stop = function() {
-        if (timerObj) {
-            clearInterval(timerObj);
-            timerObj = null;
-        }
-        return this;
-    }
+function setRetardedAutoSliding() {
+    retardedAutoSliding = setTimeout(setAutoSlidingInterval,interval);
+}
 
-    this.start = function() {
-        if (!timerObj) {
-            this.stop();
-            timerObj = setInterval(func, ms);
-        }
-        return this;
-    }
-
-    this.reset = function() {
-        return this.stop().start();
-    }
+function setAutoSlidingInterval(){
+    autoSlidingInterval = setInterval(slide("slide-to-right",1),interval);
 }
 
 
