@@ -192,6 +192,9 @@ body {
 	text-align: left;
 	padding-block: 0;
 }
+.service-title strong {
+	font-weight: inherit;
+}
 .service__text, .form-description{
 	margin-top: 0;
 }

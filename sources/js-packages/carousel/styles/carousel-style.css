@@ -8,6 +8,13 @@
     flex-flow: row nowrap;
     width: 100%;
 }
+
+.carousel-container::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
 .carousel-slide {
     width: 100%;
 }
